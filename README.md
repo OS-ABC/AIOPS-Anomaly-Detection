@@ -1,6 +1,6 @@
 # AIOPS-Anomaly-Detection
 
-# kpi异常检测
+# KPI异常检测
 
 ## Install
 
