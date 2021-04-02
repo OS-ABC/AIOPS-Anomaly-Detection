@@ -1,10 +1,13 @@
 # AIOPS-Anomaly-Detection
 
-# KPI异常检测
+## 介绍
+辅助运维人员进行异常检测，检测颗粒为日志数据和指标数据，内嵌多种异常检测方法，对于使用者来说，可以回顾能帮助快速理解当前的异常检测方法，并容易地重用现有的方法，也可进行进一步的定制或改进，这有助于避免耗时但重复的重新实施工作。
 
-## Install
+## KPI异常检测
 
-### Dependencies
+### Install
+
+#### Dependencies
 
 An `environment.yml` is  provided if you prefer `conda` to manage dependencies:
 
@@ -12,14 +15,14 @@ An `environment.yml` is  provided if you prefer `conda` to manage dependencies:
 conda env create -f environment.yml
 ```
 
-### Note
+#### Note
 
 - TensorFlow >= 2.4 is required.
 - TensorFlow version is tightly coupled to CUDA and cuDNN so they should be selected carefully.
 
-## Run
+### Run
 
-### KPI Format
+#### KPI Format
 
 KPI data must be stored in csv files in the following format:
 
@@ -39,7 +42,7 @@ timestamp,   value,       label
 - `label`: `0` for normal points, `1` for anomaly points.
 - Labels are used for evaluation and are not required in the production environment.
 
-### Sample Script
+#### Sample Script
 
 A sample script can be found at `sample/main.py`:
 
@@ -48,7 +51,7 @@ cd sample
 python main.py
 ```
 
-## Usage
+### Usage
 
 To prepare the data:
 
@@ -86,4 +89,4 @@ model = bagel.Bagel()
 model.load(prefix)
 ```
 
-# 
+#
