@@ -107,8 +107,9 @@ pip install -r requirements.txt
 
 #### Log Script
 
-对自己对数据进行采样示例：
+自己对数据进行采样示例：
 
+#### BGL数据集
 ` BGL dataset`只包含时间信息，因此适合于时间窗口
 
 #### 1. 构建你自己的日志
@@ -129,12 +130,12 @@ If `step_size=0`, it used fixed window; else, it used sliding window
 
 `python sample_bgl.py`
 
-
+#### HDFS数据集
 ` HDFS dataset`包含块id信息，因此适合按块id分组
 
 *block_id 表示指定的硬盘存储空间*
 
-#### 1. 构建你的日志
+#### 1. 构建你自己的日志
 
 和BGL数据集一样的处理
 
