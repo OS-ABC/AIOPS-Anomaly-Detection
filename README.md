@@ -7,23 +7,34 @@
 
 ### Install
 
-```
-git clone https://github.com/OS-ABC/AIOPS-Anomaly-Detection.git
-cd AIOPS-Anomaly-Detection/kpi
-pip install -r requirements.txt
-```
+通常，安装此软件包时，`pip`将自动安装所需的PyPI依赖项:
+
+- 供开发使用:
+
+  ```
+  git clone https://github.com/OS-ABC/AIOPS-Anomaly-Detection.git
+  cd AIOPS-Anomaly-Detection/kpi
+  pip install -e .[dev]
+  ```
+
+- 供生产使用:
+
+  ```
+  pip install git+https://github.com/OS-ABC/AIOPS-Anomaly-Detection.git
+  ```
+
 
 #### Dependencies
+
 
  `environment.yml` 文件是用 `conda` 管理依赖:
 
 ```
 conda env create -f environment.yml
 ```
+### Note
 
-#### Note
-
-- TensorFlow >= 2.4 is required.
+- 注意TensorFlow >= 2.4
 
 ### Run
 
@@ -56,9 +67,9 @@ cd sample
 python main.py
 ```
 
-### Usage
+#### Usage
 
-To prepare the data:
+准备数据:
 
 ```python
 import bagel
@@ -71,17 +82,17 @@ valid_kpi, _, _ = valid_kpi.standardize(mean=mean, std=std)
 test_kpi, _, _ = test_kpi.standardize(mean=mean, std=std)
 ```
 
-To construct a Bagel model, train the model, and use the trained model for prediction:
+构建模型，对模型进行训练，并利用训练后的模型进行预测:
 
 ```python
 import bagel
 
 model = bagel.Bagel()
-model.fit(kpi=train_kpi.use_labels(0.), validation_kpi=valid_kpi, epochs=EPOCHS)
+model.fit(kpi=train_kpi.use_labels(0.), validation_kpi=valid_kpi, epochs=epochs)
 anomaly_scores = model.predict(test_kpi)
 ```
 
-To save and restore a trained model:
+保存和恢复经过训练的模型:
 
 ```python
 # To save a trained model
@@ -94,6 +105,7 @@ model = bagel.Bagel()
 model.load(prefix)
 ```
 
+
 ## 日志异常检测
 
 ### Install
@@ -103,15 +115,21 @@ git clone https://github.com/OS-ABC/AIOPS-Anomaly-Detection.git
 cd AIOPS-Anomaly-Detection/log
 pip install -r requirements.txt
 ```
+
+#### Note
+
+- 使用torch==1.6.0+的版本 否则 predict会报错
+
 ### Run
 
 #### Log Script
 
-对自己对数据进行采样示例：
+自己对数据进行采样示例：
 
+#### BGL数据集
 ` BGL dataset`只包含时间信息，因此适合于时间窗口
 
-#### 1. 构建你自己的日志
+##### 1. 构建你自己的日志
 
 -读取原始日志
 -提取标签、时间和起源事件
@@ -121,7 +139,7 @@ pip install -r requirements.txt
 
 `python structure_bgl.py`
 
-#### 2. 滑动窗口或固定窗口进行取样
+##### 2. 滑动窗口或固定窗口进行取样
 
 通过计算不同日志之间的时间差，使用时间窗口进行采样。窗口大小和步长的单位是小时。
 
@@ -129,21 +147,22 @@ If `step_size=0`, it used fixed window; else, it used sliding window
 
 `python sample_bgl.py`
 
-
+#### HDFS数据集
 ` HDFS dataset`包含块id信息，因此适合按块id分组
 
 *block_id 表示指定的硬盘存储空间*
 
-#### 1. 构建你的日志
+##### 1. 构建你自己的日志
 
 和BGL数据集一样的处理
 
-#### 2. 根据 block_id采样
+##### 2. 根据 block_id采样
 
 `python sample_hdfs`
 
+#### 使用样例
 
-Train & Test DeepLog example
+数据准备好进行训练和测试，可在confg里修改参数，选择异常检测方法，例如使用 DeepLog方法去检测
 
 ```
 cd demo
@@ -158,23 +177,62 @@ python deeplog.py test
 
 ### 构建自己的模型
 
+
+可以在demo/config尝试修改参数构建自己的模型
+
 下面是一个loganomal模型的关键参数示例，它在 `demo/loganomaly.py`  
-尝试修改这些参数可以构建自己的模型
+
+```
+# Smaple
+options['sample'] = "sliding_window" # 滑动窗口
+options['window_size'] = 10 # 窗口的大小，主要滑动获取日志信息的
+
+# Features
+options['sequentials'] = True # 序列特征
+options['quantitatives'] = True # 统计特征
+options['semantics'] = False # 语义特征
+
+Model = loganomaly(input_size=options['input_size'], # 输入的大小
+                    hidden_size=options['hidden_size'],# 隐藏层的大小
+                    num_layers=options['num_layers'],# 神经网络层数目
+                    num_keys=options['num_classes']) # 分的类别
+                     
+```
+下面是一个deeplog模型的关键参数示例，它在 `demo/loganomaly.py`  
 
 ```
 # Smaple
 options['sample'] = "sliding_window"
-options['window_size'] = 10
+options['window_size'] = 10  
 
 # Features
 options['sequentials'] = True
-options['quantitatives'] = True
+options['quantitatives'] = False
 options['semantics'] = False
 
-Model = loganomaly(input_size=options['input_size'],
-                    hidden_size=options['hidden_size'],
-                    num_layers=options['num_layers'],
-                    num_keys=options['num_classes'])
+Model = deeplog(input_size=options['input_size'], # 输入的大小
+                    hidden_size=options['hidden_size'],# 隐藏层的大小
+                    num_layers=options['num_layers'],# 神经网络层数目
+                    num_keys=options['num_classes']) # 分的类别
+                     
+```
+下面是一个robustlog模型的关键参数示例，它在 `demo/loganomaly.py`  
+
+```
+# Smaple
+options['sample'] = "session_window" # 会话窗口
+options['window_size'] = -1
+
+# Features
+options['sequentials'] = False
+options['quantitatives'] = False
+options['semantics'] = True
+
+Model = robustlog(input_size=options['input_size'], # 输入的大小
+                    hidden_size=options['hidden_size'],# 隐藏层的大小
+                    num_layers=options['num_layers'],# 神经网络层数目
+                    num_keys=options['num_classes']) # 分的类别
+                     
 ```
 
 ## 
