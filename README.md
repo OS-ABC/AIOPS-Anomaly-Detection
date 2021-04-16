@@ -53,9 +53,14 @@ timestamp,   value,       label
 keras.layers.Dense
 
 四、执行命令
-训练命令为：cd ~/codes/Anomaly/KPIAnomaly && ~/conda/bin/python3 main.py
-测试命令为（待测试文件放到test中）：cd /home/nlp/Anomaly/KPIAnomaly && ~/conda/bin/python3 predict.py
-
+训练命令为：
+```
+cd ~/codes/Anomaly/KPIAnomaly && ~/conda/bin/python3 main.py
+```
+测试命令为（待测试文件放到test中）：
+```
+cd /home/nlp/Anomaly/KPIAnomaly && ~/conda/bin/python3 predict.py
+```
 
 ## 日志异常检测
 
@@ -83,14 +88,37 @@ keras.layers.Dense
 
 
 四、执行命令
-1、预处理文件（日志文件存放在data/hdfs中）：cd /home/nlp/Anomaly/LogAnomaly/ && ~/conda3/bin/python3 deal_log_data.py
-2、训练命令为：cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 deeplog.py train
-3、测试命令为：cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 deeplog.py predict
 
-或 PCA
-训练命令为：cd /home/nlp/Anomaly/LogAnomaly/pca && ~/conda3/bin/python3 pca_main.py
+- 例如采用deeplog方法：
+1、预处理文件（日志文件存放在data/hdfs中）：
+```
+cd /home/nlp/Anomaly/LogAnomaly/ && ~/conda3/bin/python3 deal_log_data.py
+```
 
-或 Robustlog
-训练命令为：cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 robustlog.py train
-测试命令为：cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 robustlog.py predict
+2、训练命令为：
+```
+cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 deeplog.py train
+```
+
+3、测试命令为：
+```
+cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 deeplog.py predict
+```
+- 采用PCA方法
+训练命令为：
+```
+cd /home/nlp/Anomaly/LogAnomaly/pca && ~/conda3/bin/python3 pca_main.py
+```
+- 采用Robustlog方法
+ 
+训练命令为：
+```
+cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 robustlog.py train
+```
+
+测试命令为：
+```
+cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 robustlog.py predict
+```
+
 
