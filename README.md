@@ -90,33 +90,33 @@ cd /home/nlp/Anomaly/KPIAnomaly && ~/conda/bin/python3 predict.py
 #### 四、执行命令
 
 - 采用deeplog方法：
-1、预处理文件（日志文件存放在data/hdfs中）：
+- 1、预处理文件（日志文件存放在data/hdfs中）：
 ```
 cd /home/nlp/Anomaly/LogAnomaly/ && ~/conda3/bin/python3 deal_log_data.py
 ```
 
-2、训练命令为：
+- 2、训练命令为：
 ```
 cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 deeplog.py train
 ```
 
-3、测试命令为：
+- 3、测试命令为：
 ```
 cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 deeplog.py predict
 ```
 - 采用PCA方法
-训练命令为：
+- 训练命令为：
 ```
 cd /home/nlp/Anomaly/LogAnomaly/pca && ~/conda3/bin/python3 pca_main.py
 ```
 - 采用Robustlog方法
  
-训练命令为：
+- 训练命令为：
 ```
 cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 robustlog.py train
 ```
 
-测试命令为：
+- 测试命令为：
 ```
 cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 robustlog.py predict
 ```
