@@ -111,12 +111,12 @@ cd /home/nlp/Anomaly/LogAnomaly/pca && ~/conda3/bin/python3 pca_main.py
 ```
 - 采用Robustlog方法
  
-- 训练命令为：
+- 1、训练命令为：
 ```
 cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 robustlog.py train
 ```
 
-- 测试命令为：
+- 2、测试命令为：
 ```
 cd /home/nlp/Anomaly/LogAnomaly/main && ~/conda3/bin/python3 robustlog.py predict
 ```
