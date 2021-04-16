@@ -5,6 +5,10 @@
 
 ## 部署
 
+```
+docker build dockerfile
+```
+
 ## KPI异常检测
 
 ### 使用运行
