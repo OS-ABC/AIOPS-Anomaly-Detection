@@ -1,0 +1,1 @@
+cd /home/nlp/LogAnomaly/deeplog && ~/conda/bin/python3 index.py

@@ -1,0 +1,157 @@
+FROM ubuntu:latest
+
+# 修改源为国内源
+RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
+     && sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
+
+RUN apt-get clean && apt-get update |fix-missing
+
+
+
+# 更新系统
+RUN apt-get update
+
+# 软件安装所必须的依赖时，有可能会出现对话框进行选择，如果不选择会导致镜像制作失败，需要添加如下语句
+#+++++++++++++++++++
+# 添加管理员账户nlp，设置工作目录，密码为nlp
+RUN useradd -ms /bin/bash nlp && \
+    adduser nlp sudo && \
+    echo "nlp:nlp"|chpasswd && \
+    echo "root:root"|chpasswd
+
+# 设置运行账户，设置环境变量并容器启动后需要运行的命令
+# 改变运行账户、工作目录和运行Shell（/bin/bash，默认Shell为/bin/sh）
+ENV HOME /home/nlp
+ENV HOSTNAME nlp-pc
+WORKDIR /home/nlp
+#+++++++++++++++++++
+
+# 安装iproute2等的依赖时，会出现对话框，制作镜像时不选择会失败，解决方案是添加语句： ENV DEBIAN_FRONTEND noninteractive)
+ENV DEBIAN_FRONTEND noninteractive
+
+# 安装apt-utils（允许安装第三方软件）、sudo、vim、iproute2、wget（下载文件）
+
+RUN apt-get install -y apt-utils sudo vim iproute2 wget
+
+
+# |||||||||||||||||||-
+# 安装OpenSSH
+RUN apt-get install -y openssh-server
+# 修改ssh配置文件，文件位置/etc/ssh/sshd_config，添加允许所有主机连接
+
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config && \
+    echo 'sshd:ALL' >> /etc/hosts.aldlow
+
+# 开放22端口
+EXPOSE 22
+# ssh服务需要在容器启动时运行，一般由CMD或者ENTRYPOINT设置执行
+
+
+
+# |||||||||||||||||||-
+# 安装完软件之后，自动清除缓存
+RUN apt-get autoclean && apt-get autoremove
+
+#++++++++++++++++++++
+
+USER nlp
+
+# 下载Miniconda
+# RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/conda.sh
+RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2020.07-Linux-x86_64.sh -O ~/conda.sh
+# ADD Anaconda3-2020.07-Linux-x86_64.sh /home/nlp/conda.sh
+
+
+# 安装Miniconda, -b为静默安装，-p为指定安装目录，安装完成之后删除安装程序
+
+RUN /bin/bash ~/conda.sh -b -p ~/conda && rm ~/conda.sh
+# RUN /bin/bash ~/conda.sh -b -p ~/conda && \ rm ~/conda.sh
+
+ 
+# 添加conda变量到PATH
+RUN echo '\n\
+__conda_setup="$('/home/nlp/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"\n\
+
+if [ $? -eq 0 ]; then\n\
+    eval "$__conda_setup"\n\
+else\n\
+    if [ -f "/home/nlp/conda/etc/profile.d/conda.sh" ]; then\n\
+        . "/home/nlp/conda/etc/profile.d/conda.sh"\n\
+    else\n\
+        export PATH="/home/nlp/conda/bin:$PATH"\n\
+    fi\n\
+fi\n\
+unset __conda_setup\n'\
+>> ~/.bashrc && \
+    /bin/bash -c 'source  ~/.bashrc'
+
+
+# 更改Python国内源
+RUN mkdir ~/.pip && \
+    cd ~/.pip && \
+echo "\
+[global]\n\
+index-url = https://mirrors.aliyun.com/pypi/simple/\n\
+\n\
+[install]\n\
+trusted-host=mirrors.aliyun.com\n"\
+> ~/.pip/pip.conf 
+
+
+# 更改conda国内源
+RUN echo "\
+channels:\n\
+   - defaults\n\
+show_channel_urls: true\n\
+channel_alias: https://mirrors.tuna.tsinghua.edu.cn/anaconda\n\
+default_channels:\n\
+   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main\n\
+   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free\n\
+   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r\n\
+   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/pro\n\
+   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/msys2\n\
+
+custom_channels:\n\
+   conda-forge: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud\n\
+   msys2: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud\n\
+   bioconda: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud\n\
+   menpo: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud\n\
+   pytorch: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud\n\
+   simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud\n"\
+ > ~/.condarc
+
+
+# 新增代码至镜像文件库
+ADD Anomaly.zip /home/nlp/Anomaly.zip
+USER root
+RUN apt-get install -y unzip && unzip -o /home/nlp/Anomaly.zip && rm /home/nlp/Anomaly.zip
+RUN ~/conda/bin/pip3 install Keras==2.3.1 tensorflow==2.4 tensorflow-probability==0.12.1 torch==1.4.0
+RUN chmod +x /home/nlp/Anomaly/KPIAnomaly/run_train_test.sh && chmod +x /home/nlp/Anomaly/LogAnomaly/run_train_test.sh
+
+
+#+++++++++++++++++++
+# 设置容器运行时执行的命令，启动ssh服务,并进入bash Shell
+ENTRYPOINT sudo service ssh start && /bin/bash
+
+
+#|||||||||||||||||||||||||||||||||||||||||||-
+
+# 本地运行方式，建议进入docker后按照文件执行
+# 执行项目中的sh文件run_train_test.sh
+# ./run_train_test.sh
+
+#|||||||||||||||||||||||||||||||||||||||||||-
+
+#|||||||||||||||||||||||||||||||||||||||||||-
+
+# 利用Dockerfile创建定制镜像，同时指定版本号
+# docker build . -t mylinux:1.0
+
+
+# 创建完成之后，利用docker run命令生成新的容器，同时把容器的22端口映射到宿主机的8888端口上，指定容器名、主机名等
+# docker run -it -p 8888:22 |name ubuntu_conda -h nlp-pc mylinux:1.0
+
+# 远程通过SSH连接到容器，需要知道宿主机的IP地址
+# ssh -p 8888 nlp@192.168.0.1
+
+#|||||||||||||||||||||||||||||||||||||||||||-
